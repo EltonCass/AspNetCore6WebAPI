@@ -24,7 +24,6 @@ namespace CityInfo.API.Controllers
             ICityInfoRepository cityInfoRepository,
             IMapper mapper)
         {
-                throw new ArgumentNullException(nameof(logger));
             _mailService = mailService ?? 
                 throw new ArgumentNullException(nameof(mailService));
             _cityInfoRepository = cityInfoRepository ?? 
