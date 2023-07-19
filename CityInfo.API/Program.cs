@@ -1,11 +1,16 @@
 using CityInfo.API;
 using CityInfo.API.DbContexts;
+using CityInfo.API.Models;
 using CityInfo.API.Services;
+using CityInfo.API.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System;
 using System.Reflection;
 using System.Text;
 
@@ -22,17 +27,28 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
 // Add services to the container.
-
 builder.Services.AddControllers(options =>
 {
     options.ReturnHttpNotAcceptable = true;
-}).AddNewtonsoftJson()
-.AddXmlDataContractSerializerFormatters();
-    
+})
+    .AddNewtonsoftJson()
+    .AddXmlDataContractSerializerFormatters();
+
+builder.Services.AddFluentValidationAutoValidation(config =>
+{
+    config.DisableDataAnnotationsValidation = true;
+});
 
 // Learn more about configuring Swagger/OpenAPI at
 // https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IValidator<CityDto>, CityValidator>();
+builder.Services.AddScoped<IValidator<PointOfInterestForUpsertDto>, PointsOfInterestValidator>();
+//builder.Services
+//    .AddValidatorsFromAssemblyContaining<CityValidator>()
+//    .AddValidatorsFromAssemblyContaining<PointsOfInterestValidator>();
+
 builder.Services.AddSwaggerGen(setupAction =>
 {
     var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -67,15 +83,16 @@ builder.Services.AddTransient<IMailService, LocalMailService>();
 builder.Services.AddTransient<IMailService, CloudMailService>();
 #endif
 
-builder.Services.AddSingleton<CitiesDataStore>();
-
-builder.Services.AddDbContext<CityInfoContext>(
+builder.Services
+    .RegisterRepositoriesServices()
+    .AddDbContext<CityInfoContext>(
     dbContextOptions => dbContextOptions.UseSqlite(
-        builder.Configuration["ConnectionStrings:CityInfoDBConnectionString"]));
-
-builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
-
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        builder.Configuration["ConnectionStrings:CityInfoDBConnectionString"]))
+    .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
+    .AddOptions<ConfigurationOptions>()
+    .Bind(builder.Configuration.GetSection(ConfigurationOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
@@ -114,21 +131,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger()
+        .UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseRouting();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.UseHttpsRedirection()
+    .UseRouting()
+    .UseAuthentication()
+    .UseAuthorization()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
 
 app.Run();

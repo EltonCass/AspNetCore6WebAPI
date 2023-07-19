@@ -1,11 +1,12 @@
-﻿using CityInfo.API.Models;
+﻿using CityInfo.API.Controllers;
+using CityInfo.API.Models;
 
 namespace CityInfo.API
 {
     public class CitiesDataStore
     {
         public List<CityDto> Cities { get; set; }
-       // public static CitiesDataStore Current { get; } = new CitiesDataStore();
+        // public static CitiesDataStore Current { get; } = new CitiesDataStore();
 
         public CitiesDataStore()
         {
@@ -64,7 +65,6 @@ namespace CityInfo.API
                      }
                 }
             };
-
         }
 
     }
