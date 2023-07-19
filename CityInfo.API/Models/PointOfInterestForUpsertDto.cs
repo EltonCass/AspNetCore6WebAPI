@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CityInfo.API.Validators;
+using System.ComponentModel.DataAnnotations;
 
 namespace CityInfo.API.Models
 {
-    public class PointOfInterestForCreationDto
+    [NameMustBeDifferentFromDescription]
+    public class PointOfInterestForUpsertDto
     {
         [Required(ErrorMessage = "You should provide a name value.")]
         [MaxLength(50)]

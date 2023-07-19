@@ -1,0 +1,54 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@hostname=localhost
+@portNumber= 7169
+
+POST https://{{hostname}}:{{portNumber}}/api/authentication/authenticate
+Content-Type: application/json
+
+{
+    "username": "KevinDockx",
+    "password": "This is a relatively long sentence that acts as my password"
+}
+
+###
+@version = 2
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZ2l2ZW5fbmFtZSI6IktldmluIiwiZmFtaWx5X25hbWUiOiJEb2NreCIsImNpdHkiOiJBbnR3ZXJwIiwibmJmIjoxNjg5MzcxMTM4LCJleHAiOjE2ODkzNzQ3MzgsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcxNjkiLCJhdWQiOiJjaXR5aW5mb2FwaSJ9.5KhrC78yjCUJe-uPdgr9Rqu0UOnqAvq089Hky_HMl38
+
+GET https://{{hostname}}:{{portNumber}}/api/v{{version}}/cities
+Authorization: bearer {{token}}
+Accept: application/json
+
+###
+@id=1
+GET https://{{hostname}}:{{portNumber}}/api/v{{version}}/cities/{{id}}
+Authorization: bearer {{token}}
+Accept: application/json
+
+###
+POST https://{{hostname}}:{{portNumber}}/api/v{{version}}/cities/3/pointsofinterest
+Authorization: bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Gusto Restaurant",
+    "description": "Famous restaurant."
+}
+
+###
+@cityNumber = 3
+GET https://{{hostname}}:{{portNumber}}/api/v{{version}}/cities/{{cityNumber}}/pointsofinterest
+Authorization: bearer {{token}}
+Accept: application/json
+
+###
+@pointOfInterestId= 13
+DELETE https://{{hostname}}:{{portNumber}}/api/v{{version}}/cities/{{cityNumber}}/pointsofinterest/{{pointOfInterestId}}
+Authorization: bearer {{token}}
+Accept: application/json
+
+###
+@pageSize = 1
+@pageNumber =2
+GET https://{{hostname}}:{{portNumber}}/api/v{{version}}/cities?pageSize={{pageSize}}&pageNumber={{pageNumber}}
+Authorization: bearer {{token}}
+Accept: application/json
